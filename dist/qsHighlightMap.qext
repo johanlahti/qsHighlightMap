@@ -1,0 +1,9 @@
+{
+	"name" : "qsHighlightMap",
+	"description" : "A simple map suitable for story-telling, when you want to highlight something in the map",
+	"icon" : "extension",
+	"preview" : "img/screenshot.png",
+	"type" : "visualization",
+	"version": "0.1",
+	"author": "Johan Lahti <johanlahti@gmail.com>"
+}

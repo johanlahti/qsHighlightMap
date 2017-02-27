@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Dynamic Map extension for Qlik Sense</title>
+		
+		<link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+		<link rel="stylesheet" href="node_modules/leaflet-pulse-icon/dist/L.Icon.Pulse.css" />
+		<link rel="stylesheet" type="text/css" href="./css/qlikMap2D.css">
+
+		<style type="text/css">
+			.qv-object-qlikMap2D-mapdiv {
+				width: 100%;
+				height: 100%;
+			}
+			.qv-map-ext-container {
+				position: absolute;
+				width: 100%;
+				height: 100%;
+				top: 0;
+				left: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- <script src="/Library/WebServer/Documents/qlik/sense-client/web/assets/external/requirejs/require.js"></script> -->
+		<!-- <script src="/Library/WebServer/Documents/qlik/sense-client/web/assets/qvangular/qvangular-injector-require-plugin.js"></script> -->
+		<!-- <script src="/Library/WebServer/Documents/qlik/sense-client/web/assets/external/requirejs/css.js"></script> -->
+		
+		<script src="/Library/WebServer/Documents/qlik/sense-client/web/assets/external/jquery/jquery.js"></script>
+		<script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet.js"></script>
+		<script src="node_modules/leaflet-pulse-icon/dist/L.Icon.Pulse.js"></script>
+		<script src="mockup/layout_global.js"></script>
+		<script src="qlikMap2DFuncs_global.js"></script>
+
+		<div class="qv-object-com-qliktech-qlikmap2d">
+			<div class="qv-map-ext-container"></div>
+		</div>
+		<script>
+			funcs.render( $(".qv-map-ext-container") );
+			$(window).on("resize", function() {
+				funcs.render( $(".qv-map-ext-container") );
+			});
+			
+		</script>
+		
+	</body>
+
+</html>

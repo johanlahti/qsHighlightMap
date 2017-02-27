@@ -1,0 +1,47 @@
+{
+  "name": "qlik-sense-extension-template",
+  "version": "0.0.0",
+  "description": "A map extension for Qlik Sense for story telling type of apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "pkill -f phantomjs; browserify ./test/test.js --basedir ./ --transform babelify | testling | faucet",
+    "clean": "rm -rf ./dist; mkdir ./dist",
+    "move:css": "for file in `cat dependencies-css.txt`; do cp \"$file\" ./dist/css; done",
+    "move:deploy": "cp -r ./dist/* ~/Qlik/Sense/Extensions/qsHighlightMap",
+    "move": "mkdir ./dist/css ; npm run move:css && cp ./src/qsHighlightMap.qextmpl ./dist/qsHighlightMap.qext",
+    "deploy": "open http://localhost:4848/sense/app/%2FUsers%2Fbjr%2FQlik%2FSense%2FApps%2FConsumer%20Goods%20Sales.qvf/sheet/FFmnDA/state/analysis ; npm run build && npm run move:deploy",
+    "deploy:watch": "watch 'npm run deploy' ./src/js",
+    "css:stylus": "stylus ./src/css -o ./src/css",
+    "css:watch": "stylus -w ./css -o ./css",
+    "css": "npm run css:stylus",
+    "js:browserify": "browserify -e ./src/dynamicMapFuncs.es -o ./dist/dynamicMapFuncs.js --transform babelify",
+    "js": "webpack",
+    "build": "npm run clean && npm run css && npm run js && npm run move"
+  },
+  "author": "Johan Lahti <johanlahti@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-core": "^6.14.0",
+    "babel-loader": "^6.2.5",
+    "babel-plugin-add-module-exports": "^0.2.1",
+    "babel-plugin-transform-class-properties": "^6.11.5",
+    "babel-polyfill": "^6.13.0",
+    "babel-preset-latest": "^6.14.0",
+    "babel-tape-runner": "^2.0.1",
+    "babelify": "^7.3.0",
+    "browserify": "^13.1.1",
+    "faucet": "0.0.1",
+    "grunt": "^1.0.1",
+    "phantomjs": "^2.1.7",
+    "stylus": "^0.54.5",
+    "tape": "^4.6.0",
+    "testling": "^1.7.1",
+    "watch": "^1.0.2",
+    "webpack": "^1.13.2"
+  },
+  "dependencies": {
+    "leaflet": "^1.0.2",
+    "leaflet-pulse-icon": "^0.1.0"
+  }
+}
