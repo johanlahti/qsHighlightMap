@@ -51,7 +51,7 @@ define(["module"],
 				// $element.addClass( "qv-object-com-qliktech-qlikmap2d" );
 				// $element.attr( "id", "qv-object-qlikmap-highlighter-"+layout.qInfo.qId );
 				// $element.css("background", "#F00");
-				qsMap.render( $element, layout );
+				$(document).ready(() => qsMap.render($element, layout));
 
 				// if (!layout.qHyperCube.qDataPages.length) {
 				// 	console.log("No qDataPages");

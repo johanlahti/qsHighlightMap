@@ -33,26 +33,34 @@ let definition = {
 				component: "expandable-items",
 				label: "My Accordion Section",
 				items: {
-					myTextBox: {
-						ref: "props.myTextBox",
-						label: "My ",
-						type: "string"
-					},
-					header1: {
+					highlightSettings: {
+						// ref: "props.myTextBox",
+						label: "Highlight settings",
 						type: "items",
-						label: "Header 1",
 						items: {
-							header1_item1: {
-								ref: "props.section1.item1",
-								label: "Section 1 / Item 1",
-								type: "string",
+							highlightMax: {
+								ref: "props.highlightSettings.max",
+								label: "Highlight max value",
+								type: "boolean",
+								defaultValue: true,
 								expression: "optional"
 							},
-							header1_item2: {
-								ref: "props.section2.item1",
-								label: "Section 2 / Item 1",
-								type: "string",
+							highlightMin: {
+								ref: "props.highlightSettings.min",
+								label: "Highlight min value",
+								type: "boolean",
+								defaultValue: false,
 								expression: "optional"
+							},
+							sizeRange: {
+								type: "array",
+								component: "slider",
+								label: "Circle radius (pixels)",
+								ref: "props.highlightSettings.sizeRange",
+								min: 1,
+								max: 100,
+								step: 1,
+								defaultValue: [5, 30]
 							}
 						}
 					}

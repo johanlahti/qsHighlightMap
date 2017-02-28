@@ -37,21 +37,32 @@ let app = {
 		}
 	},
 
-	getOptions: function(customOptions={}) {
-		return $.extend(true, this.defaultOptions, customOptions); // TODO: Get property panel's options
+	/**
+	 * Returns clone of default options merged with overriding options (if any set)
+	 * @return {Object}
+	 */
+	getOptions() {
+		var props = this._layout.props;
+		var sizeRange = props.highlightSettings.sizeRange || null;
+		return $.extend(true, {}, this.defaultOptions, {
+			highlightMax: props.highlightSettings.max,
+			highlightMin: props.highlightSettings.min,
+			minFeatureSize: sizeRange ? sizeRange[0] : null,
+			maxFeatureSize: sizeRange ? sizeRange[1] : null
+		});
 	},
 
-	_needsToRender: function(layout) {
+	_needsToRender(layout) {
 		return true;
 	},
 
-	render: function($element, layout) {
+	render($element, layout) {
 		return this._needsToRender(layout) ? this._render.apply(this, arguments) : null;
 	},
 
 
-	_getMinMaxFromData: function(qMatrix) {
-		var valIndex = this.getOptions().valueIndex;
+	_getMinMaxFromData(qMatrix) {
+		var valIndex = this.options().valueIndex;
 		var val,
 			minVal = Infinity,
 			maxVal = -Infinity;
@@ -68,8 +79,8 @@ let app = {
 		}
 	},
 
-	_render: function($element, layout) {
-		
+	_render($element, layout) {
+		this._layout = layout;
 		this._renderCount = this._renderCount === undefined ? 0 : this._renderCount + 1;
 
 		if (!this._dataIsValid(layout)) {
@@ -101,7 +112,7 @@ let app = {
 
 	},
 
-	_createLayerFromMatrix: function(steps, minVal, maxVal) {
+	_createLayerFromMatrix(steps, minVal, maxVal) {
 		var self = this;
 		var step,
 			feature,
@@ -119,11 +130,11 @@ let app = {
 
 	},
 
-	_swapCoords: function(coordsArr) {
+	_swapCoords(coordsArr) {
 		return coordsArr.reverse(); // Polyfill exists for reverse in IE11 in Sense?
 	},
 
-	_createFeatureFromStep: function(step, minVal, maxVal) {
+	_createFeatureFromStep(step, minVal, maxVal) {
 		var measureValue = step[this.getOptions().valueIndex].qNum,
 			measureText = step[this.getOptions().valueIndex].qText,
 			latLngArr;
@@ -150,14 +161,14 @@ let app = {
 
 		// console.log(measureValue + "->" + radius);
 		var color = "rgb(" + [colorValue, 0, 0].join(", ") + ")";
-		var feature = L.circleMarker(latLngArr, {radius: radius, color: color, fillColor: color});
+		var feature = L.circleMarker(latLngArr, {radius, color, fillColor: color});
 		feature.properties = feature.properties || {};
 		feature.properties.value = measureValue;
 		feature.properties.valueText = measureText;
 		return feature;
 	},
 
-	highlightFeature: function(feature) {
+	highlightFeature(feature) {
 		// if (!this.$canvas) {
 		// 	this.$canvas = $('<canvas class="qv-highlight-canvas" />');
 		// }
@@ -207,10 +218,10 @@ let app = {
 		
 	// 	ctx.fill();
 		
-	// },
+	// }
 
 
-	// filterIntersectingMarkers: function(markers, bufferMeters) {
+	// filterIntersectingMarkers(markers, bufferMeters) {
 	// 	var marker, latLng,
 	// 		out = [], m;
 	// 	for (var i = 0; i < markers.length; i++) {
@@ -229,9 +240,9 @@ let app = {
 	// 		}
 	// 	}
 	// 	return out;
-	// },
+	// }
 
-	_drawMap: function($element) {
+	_drawMap($element) {
 		if (!this._$map) {
 			// this._drawTimeLabel($element);
 			this._$map = $('<div class="qv-object-qshighlightmap-mapdiv" />');
@@ -258,7 +269,7 @@ let app = {
 		}
 	},
 
-	_drawTimeLabel: function($element) {
+	_drawTimeLabel($element) {
 		var $div = $('<div class="qv-time-header"><label>Time step</label></div>');
 		$element.prepend($div);
 
@@ -273,11 +284,11 @@ let app = {
 
 	},
 
-	notify: function( text ) {
+	notify( text ) {
 		alert(text);
 	},
 
-	_dataIsValid: function( layout ) {
+	_dataIsValid( layout ) {
 		if (!layout) {
 			return false;
 		}
@@ -295,7 +306,7 @@ let app = {
 		
 	},
 
-	filterMarkers: function(layer, filter) {
+	filterMarkers(layer, filter) {
 		var markers = [],
 			self = {},
 			winnerMarker;
@@ -314,7 +325,7 @@ let app = {
 		return winnerMarker;
 	},
 
-	_renderStep: function(layer) {
+	_renderStep(layer) {
 		// $(".qv-object-com-qliktech-qshighlightmap .qv-time-title").text(timeString);
 		var self = this,
 			count = 0,
@@ -359,7 +370,7 @@ let app = {
 
 	},
 
-	fadeLayer: function(layer, fadeIn) {
+	fadeLayer(layer, fadeIn) {
 		fadeIn = fadeIn || false;
 
 		var layerDiv = layer.getPane();
@@ -379,7 +390,7 @@ let app = {
 
 	},
 	
-	_renderLayer: function(layer) {
+	_renderLayer(layer) {
 		// if (this._extraMarker) {
 		// 	this.map.removeLayer(this._extraMarker);
 		// }
@@ -430,7 +441,7 @@ let app = {
 		// }).bind(this), 1500);
 	},
 
-	createPulsingMarkers: function(markers) {
+	createPulsingMarkers(markers) {
 		var pulsingMarkers = [];
 		markers.forEach( (marker) => {
 			var filterOptions = this.filterSettings[ marker.properties._filterType ];
@@ -447,7 +458,7 @@ let app = {
 		return pulsingMarkers;
 	},
 
-	_normalizeValue: function(min, max, val, desiredMin, desiredMax) {
+	_normalizeValue(min, max, val, desiredMin, desiredMax) {
 		desiredMin = desiredMin || 0;
 		desiredMax = desiredMax || 1;
 		
