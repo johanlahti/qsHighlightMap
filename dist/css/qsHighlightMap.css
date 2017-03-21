@@ -1,18 +1,18 @@
-.qv-object-qsHighlightMap {
+.qv-object-qshighlightmap {
   font-family: arial;
 }
-.qv-object-qsHighlightMap .qv-object-qshighlightmap-mapdiv {
+.qv-object-qshighlightmap .qv-object-qshighlightmap-mapdiv {
   width: 100%;
   height: 100%;
   background: #000;
 }
-.qv-object-qsHighlightMap .qv-highlight-canvas {
+.qv-object-qshighlightmap .qv-highlight-canvas {
   position: absolute;
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.3s;
 }
-.qv-object-qsHighlightMap .qv-time-nav {
+.qv-object-qshighlightmap .qv-time-nav {
   width: 100%;
   font-size: 1.5em;
   position: absolute;
@@ -26,20 +26,20 @@
   left: 50%;
   transform: translate(-50%, 0);
 }
-.qv-object-qsHighlightMap .qv-time-nav .nav-btn {
+.qv-object-qshighlightmap .qv-time-nav .nav-btn {
   padding: 0.5em 1em;
   background-color: #000;
   color: #fff;
   cursor: pointer;
   display: inline-block;
 }
-.qv-object-qsHighlightMap .qv-time-nav .nav-btn:nth-child(2) {
+.qv-object-qshighlightmap .qv-time-nav .nav-btn:nth-child(2) {
   border-left: 1px solid #ddd;
 }
-.qv-object-qsHighlightMap .canvas-visible {
+.qv-object-qshighlightmap .canvas-visible {
   opacity: 1;
 }
-.qv-object-qsHighlightMap .qv-time-header {
+.qv-object-qshighlightmap .qv-time-header {
   z-index: 2000;
   top: 0;
   width: 100%;
@@ -53,37 +53,40 @@
   font-weight: bold;
   font-family: arial;
 }
-.qv-object-qsHighlightMap .qv-time-header label {
+.qv-object-qshighlightmap .qv-time-header label {
   display: block;
   margin-left: 30%;
   opacity: 0;
   transition: all 0.5s;
 }
-.qv-object-qsHighlightMap .qv-time-header label.qv-time-header-slidein {
+.qv-object-qshighlightmap .qv-time-header label.qv-time-header-slidein {
   margin-left: 0;
   transition: all 0.5s;
   opacity: 1;
 }
-.qv-object-qsHighlightMap .qv-time-header label.qv-time-header-slideout {
+.qv-object-qshighlightmap .qv-time-header label.qv-time-header-slideout {
   margin-left: -100%;
   transition: all 0.5s;
 }
-.qv-object-qsHighlightMap div.leaflet-pane.leaflet-overlay-pane] {
+.qv-object-qshighlightmap div.leaflet-pane.leaflet-overlay-pane] {
   opacity: 1;
   margin: 0;
   filter: none;
 }
-.qv-object-qsHighlightMap .layer-transition-opacity {
-  transition: opacity 1s, filter 0.5s !important;
+.qv-object-qshighlightmap .layer-transition-opacity {
+  transition: opacity 0.5s !important;
 }
-.qv-object-qsHighlightMap .layer-dimmed {
+.qv-object-qshighlightmap .layer-dimmed {
   opacity: 0;
 }
-.qv-object-qsHighlightMap .leaflet-top .leaflet-control {
+.qv-object-qshighlightmap .leaflet-top .leaflet-control {
   margin-top: 6em;
 }
-.qv-object-qsHighlightMap .leaflet-popup-content-wrapper,
-.qv-object-qsHighlightMap .leaflet-popup-tip {
+.qv-object-qshighlightmap .leaflet-popup-content h3 {
+  font-size: 0.9em;
+}
+.qv-object-qshighlightmap .leaflet-popup-content-wrapper,
+.qv-object-qshighlightmap .leaflet-popup-tip {
   background: #000;
   color: #fff;
   font-size: 1.5em;

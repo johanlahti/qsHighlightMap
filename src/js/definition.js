@@ -31,10 +31,10 @@ let definition = {
 			appearance: {
 				uses: "settings",
 				component: "expandable-items",
-				label: "My Accordion Section",
+				label: "Map settings",
 				items: {
 					highlightSettings: {
-						// ref: "props.myTextBox",
+						// ref: "props.highlightSettings",
 						label: "Highlight settings",
 						type: "items",
 						items: {
@@ -49,7 +49,7 @@ let definition = {
 								ref: "props.highlightSettings.min",
 								label: "Highlight min value",
 								type: "boolean",
-								defaultValue: false,
+								defaultValue: true,
 								expression: "optional"
 							},
 							sizeRange: {
@@ -61,6 +61,45 @@ let definition = {
 								max: 100,
 								step: 1,
 								defaultValue: [5, 30]
+							},
+							flyToBoundsOnUpdate: {
+								ref: "props.highlightSettings.flyToBoundsOnUpdate",
+								label: "Fly to bounds on data update",
+								type: "boolean",
+								defaultValue: true,
+								expression: "optional"
+							}
+						}
+					},
+					advancedSettings: {
+						// ref: "props.advancedSettings",
+						label: "Advanced map settings",
+						type: "items",
+						items: {
+							coordsNorthingFirst: {
+								ref: "props.advancedSettings.coordsNorthingFirst",
+								label: "Coordinates northing first",
+								type: "boolean",
+								defaultValue: true,
+								expression: "optional"
+							},
+							geoIndex: {
+								ref: "props.advancedSettings.geoIndex",
+								label: "Geographic column index",
+								type: "integer",
+								min: 0,
+								max: 1,
+								defaultValue: 0,
+								expression: "required"
+							},
+							valueIndex: {
+								ref: "props.advancedSettings.valueIndex",
+								label: "Value column index",
+								type: "integer",
+								min: 0,
+								max: 1,
+								defaultValue: 1,
+								expression: "required"
 							}
 						}
 					}
@@ -69,18 +108,6 @@ let definition = {
 			addons: {
 				uses: "addons"
 			}
-			// ,
-			// appearancePanel: {
-			// 	uses: "settings",
-			// 	items: {
-			// 		MyStringProp: {
-			// 			ref: "myDynamicOutput",
-			// 			type: "string",
-			// 			label: "Hello World Text",
-			// 			defaultValue: "Hello world"
-			// 		}
-			// 	}
-			// }
 		}
 };
 

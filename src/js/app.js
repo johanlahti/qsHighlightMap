@@ -22,7 +22,7 @@ let app = {
 		},
 		geoIndex: 0,
 		valueIndex: 1,
-		relativeStyling: false, // style based on min/max values for each data volume. If false, max for whole dataset is used
+		// relativeStyling: false, // style based on min/max values for each data volume. If false, max for whole dataset is used
 		flyToBoundsOnUpdate: true
 	},
 
@@ -37,18 +37,24 @@ let app = {
 		}
 	},
 
+	_timeouts: [],
+
 	/**
 	 * Returns clone of default options merged with overriding options (if any set)
 	 * @return {Object}
 	 */
 	getOptions() {
-		var props = this._layout.props;
-		var sizeRange = props.highlightSettings.sizeRange || null;
+		let props = this._layout.props;
+		let sizeRange = props.highlightSettings.sizeRange || null;
 		return $.extend(true, {}, this.defaultOptions, {
 			highlightMax: props.highlightSettings.max,
 			highlightMin: props.highlightSettings.min,
 			minFeatureSize: sizeRange ? sizeRange[0] : null,
-			maxFeatureSize: sizeRange ? sizeRange[1] : null
+			maxFeatureSize: sizeRange ? sizeRange[1] : null,
+			flyToBoundsOnUpdate: props.highlightSettings.flyToBoundsOnUpdate,
+			coordsNorthingFirst: props.advancedSettings.coordsNorthingFirst,
+			geoIndex: props.advancedSettings.geoIndex,
+			valueIndex: props.advancedSettings.valueIndex
 		});
 	},
 
@@ -61,27 +67,32 @@ let app = {
 	},
 
 
-	_getMinMaxFromData(qMatrix) {
-		var valIndex = this.options().valueIndex;
-		var val,
-			minVal = Infinity,
-			maxVal = -Infinity;
-		qMatrix.forEach(function(step) {
-			val = step[valIndex].qNum;
-			if (isNaN(val)) 
-				return;
-			minVal = Math.min(val, minVal);
-			maxVal = Math.max(val, maxVal);
-		});
-		return {
-			minVal: minVal,
-			maxVal: maxVal
-		}
-	},
+	// _getMinMaxFromData(qMatrix) {
+	// 	var valIndex = this.options().valueIndex;
+	// 	var val,
+	// 		minVal = Infinity,
+	// 		maxVal = -Infinity;
+	// 	qMatrix.forEach(function(step) {
+	// 		val = step[valIndex].qNum;
+	// 		if (isNaN(val)) 
+	// 			return;
+	// 		minVal = Math.min(val, minVal);
+	// 		maxVal = Math.max(val, maxVal);
+	// 	});
+	// 	return {
+	// 		minVal: minVal,
+	// 		maxVal: maxVal
+	// 	}
+	// },
 
 	_render($element, layout) {
 		this._layout = layout;
 		this._renderCount = this._renderCount === undefined ? 0 : this._renderCount + 1;
+
+		this._timeouts.forEach( (timeout) => {
+			clearTimeout(timeout);
+		});
+		this._timeouts = [];
 
 		if (!this._dataIsValid(layout)) {
 			if (this.timeLayer) {
@@ -93,18 +104,18 @@ let app = {
 			this._drawMap($element);
 			this.map.fitWorld();
 		}
-		var hc = $.extend(true, {}, layout.qHyperCube); // clone
-		var qMatrix = hc.qDataPages[0].qMatrix;
+		let hc = $.extend(true, {}, layout.qHyperCube),
+			qMatrix = hc.qDataPages[0].qMatrix;
 
-		var minVal = hc.qMeasureInfo[0].qMin,
-			maxVal = hc.qMeasureInfo[0].qMax;
+		const MIN_VAL = hc.qMeasureInfo[0].qMin;
+		const MAX_VAL = hc.qMeasureInfo[0].qMax;
 		// if (this.getOptions().relativeStyling) {
-		// 	var stats = this._getMinMaxFromData(qMatrix);
-		// 	minVal = stats.minVal;
-		// 	maxVal = stats.maxVal;
+		// 	let stats = this._getMinMaxFromData(qMatrix);
+		// 	MIN_VAL = stats.minVal;
+		// 	MAX_VAL = stats.maxVal;
 		// }
 		
-		var layer = this._createLayerFromMatrix(qMatrix, minVal, maxVal);
+		let layer = this._createLayerFromMatrix(qMatrix, MIN_VAL, MAX_VAL);
 		this.layer = layer;
 		this._renderStep(layer);
 		// this.goToStep(0);
@@ -112,7 +123,7 @@ let app = {
 
 	},
 
-	_createLayerFromMatrix(steps, minVal, maxVal) {
+	_createLayerFromMatrix(steps, MIN_VAL, MAX_VAL) {
 		var self = this;
 		var step,
 			feature,
@@ -120,7 +131,7 @@ let app = {
 		// var createFeatureFromStep = this._createFeatureFromStep; //.bind(this);
 		for (var i = 0; i < steps.length; i++) {
 			step = steps[i];
-			feature = this._createFeatureFromStep(step, minVal, maxVal);
+			feature = this._createFeatureFromStep(step, MIN_VAL, MAX_VAL);
 			if (feature) {
 				layer.addLayer(feature);
 			}
@@ -134,15 +145,17 @@ let app = {
 		return coordsArr.reverse(); // Polyfill exists for reverse in IE11 in Sense?
 	},
 
-	_createFeatureFromStep(step, minVal, maxVal) {
-		var measureValue = step[this.getOptions().valueIndex].qNum,
-			measureText = step[this.getOptions().valueIndex].qText,
+	_createFeatureFromStep(step, MIN_VAL, MAX_VAL) {
+		const options = this.getOptions();
+
+		var measureValue = step[options.valueIndex].qNum,
+			measureText = step[options.valueIndex].qText,
 			latLngArr;
 		if (typeof(measureValue) !== "number") {
 			return null;
 		}
 		try {
-			latLngArr = JSON.parse(step[0].qText); // Convert projection????
+			latLngArr = JSON.parse(step[options.geoIndex].qText); // Convert projection????
 		} catch(e) {
 			// throw Error("Cannot parse lat lng");
 			console.log("Cannot parse lat/lng from string");
@@ -151,13 +164,13 @@ let app = {
 		if (isNaN(latLngArr[0]) || isNaN(latLngArr[1])) {
 			return null;
 		}
-		latLngArr = this.getOptions().coordsNorthingFirst ? this._swapCoords(latLngArr) : latLngArr;
+		latLngArr = options.coordsNorthingFirst ? this._swapCoords(latLngArr) : latLngArr;
 
 		// Create a radius and color based on the measure value
 
 
-		var radius = parseInt(this._normalizeValue(minVal, maxVal, measureValue, this.getOptions().minFeatureSize, this.getOptions().maxFeatureSize)),
-			colorValue = parseInt(this._normalizeValue(minVal, maxVal, measureValue, 0, 255));
+		var radius = parseInt(this._normalizeValue(MIN_VAL, MAX_VAL, measureValue, options.minFeatureSize, options.maxFeatureSize)),
+			colorValue = parseInt(this._normalizeValue(MIN_VAL, MAX_VAL, measureValue, 0, 255));
 
 		// console.log(measureValue + "->" + radius);
 		var color = "rgb(" + [colorValue, 0, 0].join(", ") + ")";
@@ -178,10 +191,12 @@ let app = {
 		var latLng = feature.getLatLng();
 		this.fadeLayer(this.timeLayer, false);
 		this.map.flyTo(latLng, 10, {duration: 2});
-		setTimeout((function() {
-			this.fadeLayer(this.timeLayer, true);
-		}).bind(this), 4000);
-		// feature.openPopup();
+
+		this._timeouts.push(
+			setTimeout(() => {
+				this.fadeLayer(this.timeLayer, true);
+			}, 4000)
+		);
 	},
 
 	// _drawCanvasHole(left, right, top, bottom) {
@@ -245,7 +260,7 @@ let app = {
 	_drawMap($element) {
 		if (!this._$map) {
 			// this._drawTimeLabel($element);
-			this._$map = $('<div class="qv-object-qshighlightmap-mapdiv" />');
+			this._$map = $('<div id="qv-object-qshighlightmap-mapdiv" class="qv-object-qshighlightmap-mapdiv" />');
 			$element.append(this._$map);
 			this.map = L.map(this._$map[0], {
 				// preferCanvas: true
@@ -292,7 +307,7 @@ let app = {
 		if (!layout) {
 			return false;
 		}
-		if (!layout.qHyperCube.qDataPages.length) {
+		if (!layout.qHyperCube.qDataPages || !layout.qHyperCube.qDataPages.length) {
 			console.log("No qDataPages");
 			return false;
 		}
@@ -310,7 +325,6 @@ let app = {
 		var markers = [],
 			self = {},
 			winnerMarker;
-		// 
 		
 		layer.eachLayer(function(feature) {
 			if (filter.call(self, feature.properties.value) === true) {
@@ -336,7 +350,7 @@ let app = {
 				this._bestValueSoFar = -Infinity;	
 			}
 			var prevBestVal = this._bestValueSoFar;
-			this._bestValueSoFar = Math.max(this._bestValueSoFar, value)
+			this._bestValueSoFar = Math.max(this._bestValueSoFar, value);
 			return prevBestVal < value;
 		}
 		var minFilter = function(value) {
@@ -344,7 +358,7 @@ let app = {
 				this._bestValueSoFar = Infinity;	
 			}
 			var prevBestVal = this._bestValueSoFar;
-			this._bestValueSoFar = Math.min(this._bestValueSoFar, value)
+			this._bestValueSoFar = Math.min(this._bestValueSoFar, value);
 			return prevBestVal > value;
 		}
 		var options = this.getOptions();
@@ -362,27 +376,30 @@ let app = {
 			}
 		}
 		
-		this.highlightMarkers = highlightMarkers.length ? this.createPulsingMarkers(highlightMarkers) : null;
+		highlightMarkers = highlightMarkers.length ? this.createPulsingMarkers(highlightMarkers) : null;
 
-
-		// console.log("nbr of highlight markers: " + this.highlightMarkers.length, this.highlightMarkers);
 		this._renderLayer(layer);
+		this._renderPulsingMarkers(highlightMarkers);
 
 	},
 
 	fadeLayer(layer, fadeIn) {
 		fadeIn = fadeIn || false;
 
-		var layerDiv = layer.getPane();
-		var $layerDiv = $(layerDiv);
+		let layerDiv = layer.getPane();
+		let $layerDiv = $(layerDiv);
 
 		if (fadeIn) {
+			// Fade in
 			$layerDiv.addClass("layer-transition-opacity");
-			setTimeout(function() {
-				$layerDiv.removeClass("layer-dimmed");
-			}, 1);
+			this._timeouts.push(
+				setTimeout( () => {
+					$layerDiv.removeClass("layer-dimmed");
+				}, 1)
+			);
 		}
 		else {
+			// Fade out
 			$layerDiv.removeClass("layer-transition-opacity");
 			$layerDiv.addClass("layer-dimmed");
 		}
@@ -391,38 +408,35 @@ let app = {
 	},
 	
 	_renderLayer(layer) {
-		// if (this._extraMarker) {
-		// 	this.map.removeLayer(this._extraMarker);
-		// }
+		let bounds = this.timeLayer.getBounds();
+		
+		const FLY_DURATION_MS = 500;
+		const FLY_DELAY_MS = 1000;
+
 		this.timeLayer.clearLayers();
 		this.timeLayer.addLayer(layer);
-		var bounds = this.timeLayer.getBounds();
 		
-		var flyDurationMs = 1000;
-		var pulsingMarkerDelayMs = 3000;
 		
 		if (!this._renderCount === 0) {
 			this.map.setBounds(bounds);
 		}
 		else if (this.getOptions().flyToBoundsOnUpdate) {
 			this.fadeLayer(this.timeLayer, false);
-			setTimeout( () => {
-				this.map.flyToBounds(bounds, {
-					duration: flyDurationMs / 1000
-				});
-			}, 2500);
-			setTimeout(function() {
-				this.fadeLayer(this.timeLayer, true);
-			}.bind(this), flyDurationMs);
+			this._timeouts.push(
+				setTimeout( () => {
+					this.map.flyToBounds(bounds, {
+						duration: FLY_DURATION_MS / 1000
+					})
+				}, FLY_DELAY_MS)
+			);
+			this._timeouts.push(
+				setTimeout( () => {
+					this.fadeLayer(this.timeLayer, true);
+				}, FLY_DURATION_MS)
+			);
 		}
 
-		// Let the map zoom to bounds of all data before adding highlight markers
-		setTimeout( () => {
-			this.highlightMarkers.forEach(m => {
-				this.layer.addLayer(m);
-				m.openPopup();
-			});
-		}, pulsingMarkerDelayMs);
+		
 
 		// setTimeout((function() {
 		// 	this.fadeLayer(this.timeLayer, true);
@@ -441,16 +455,30 @@ let app = {
 		// }).bind(this), 1500);
 	},
 
+	_renderPulsingMarkers(highlightMarkers) {
+		const PULSING_MARKER_DELAY_MS = 1500;
+		// Let the map zoom to bounds of all data before adding highlight markers
+		this._timeouts.push(
+			setTimeout( () => {
+				highlightMarkers.forEach(marker => {
+					this.layer.addLayer(marker);
+					marker.openPopup();
+				});
+			}, PULSING_MARKER_DELAY_MS)
+		);
+	},
+
 	createPulsingMarkers(markers) {
-		var pulsingMarkers = [];
+		let pulsingMarkers = [];
 		markers.forEach( (marker) => {
-			var filterOptions = this.filterSettings[ marker.properties._filterType ];
-			var pulsingIcon = new L.Icon.Pulse({iconSize: [20, 20], color: filterOptions.color, heartbeat: marker.properties._filterType === "minFilter" ? 2 : 1 }); // TODO: Different style for different types of highlights
-			var highlightMarker = L.marker(marker.getLatLng(), {icon: pulsingIcon}).addTo(this.timeLayer);
+			let filterOptions = this.filterSettings[ marker.properties._filterType ];
+			let pulsingIcon = new L.Icon.Pulse({iconSize: [20, 20], color: filterOptions.color, heartbeat: marker.properties._filterType === "minFilter" ? 2 : 1 }); // TODO: Different style for different types of highlights
+			let highlightMarker = L.marker(marker.getLatLng(), {icon: pulsingIcon}).addTo(this.timeLayer);
 			highlightMarker.properties = $.extend(true, {}, marker.properties);
-			var popupText = filterOptions.popupText || "No text";
+			let popupText = filterOptions.popupText || "No text";
 			highlightMarker.bindPopup(popupText.replace(/\$\{value\}/g, highlightMarker.properties.valueText), {
-				autoClose: false
+				autoClose: false,
+				autoPan: false
 			});
 			pulsingMarkers.push(highlightMarker);
 			// highlightMarker.openPopup();

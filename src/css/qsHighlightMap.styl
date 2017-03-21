@@ -1,5 +1,5 @@
 // .qv-object-com-qliktech-qshighlightmap
-.qv-object-qsHighlightMap
+.qv-object-qshighlightmap
 	font-family arial
 	.qv-object-qshighlightmap-mapdiv
 		width 100%
@@ -73,7 +73,7 @@
 		filter none
 	
 	.layer-transition-opacity
-		transition opacity 1s, filter 0.5s !important
+		transition opacity 0.5s !important  // filter 0.3s
 		
 	.layer-dimmed
 		opacity 0
@@ -81,6 +81,9 @@
 	
 	.leaflet-top .leaflet-control
 		margin-top 6em
+
+	.leaflet-popup-content h3
+		font-size 0.9em
 	
 	.leaflet-popup-content-wrapper, .leaflet-popup-tip
 		background #000

@@ -2,7 +2,7 @@
 import $ from "jquery";
 // import define from "define";
 
-import qsMap from "./qsHighlightMapFuncs";
+import app from "./app";
 import loadCss from "./loadCss";
 import definition from "./definition";
 
@@ -46,18 +46,10 @@ define(["module"],
 					]
 				}
 			},
-			paint: function ( $element, layout ) {
-				// alert("hej");
-				// $element.addClass( "qv-object-com-qliktech-qlikmap2d" );
-				// $element.attr( "id", "qv-object-qlikmap-highlighter-"+layout.qInfo.qId );
-				// $element.css("background", "#F00");
-				$(document).ready(() => qsMap.render($element, layout));
-
-				// if (!layout.qHyperCube.qDataPages.length) {
-				// 	console.log("No qDataPages");
-				// 	return;
-				// }
-				
+			paint: function ($element, layout) {
+				$element.addClass("qv-object-qshighlightmap");
+				$element.attr( "id", "qv-object-qshighlightmap-"+layout.qInfo.qId );
+				$(document).ready(() => app.render($element, layout));
 			}
 		};
 	}
