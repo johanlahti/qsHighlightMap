@@ -3,17 +3,17 @@
 let definition = {
 		type: "items",
 		component: "accordion",
-		// support: {
-		// 	snapshot: function( layout ) {
-		// 		return layout.qHyperCube.qDataPages[0].qMatrix.length;
-		// 	},
-		// 	export: function( layout ) {
-		// 		return layout.qHyperCube.qDataPages[0].qMatrix.length;
-		// 	},
-		// 	exportData: function( layout ) {
-		// 		return layout.qHyperCube.qDataPages[0].qMatrix.length;
-		// 	}
-		// },
+		support: {
+			snapshot: function( layout ) {
+				return layout.qHyperCube.qDataPages[0].qMatrix.length;
+			},
+			export: function( layout ) {
+				return layout.qHyperCube.qDataPages[0].qMatrix.length;
+			},
+			exportData: function( layout ) {
+				return layout.qHyperCube.qDataPages[0].qMatrix.length;
+			}
+		},
 		items: {
 			dimensions: {
 				uses: "dimensions",

@@ -10,9 +10,10 @@
   "scripts": {
     "test": "pkill -f phantomjs; browserify ./test/test.js --basedir ./ --transform babelify | testling | faucet",
     "clean": "rm -rf ./dist; mkdir ./dist",
-    "move:css": "for file in `cat dependencies-css.txt`; do cp \"$file\" ./dist/css; done",
+    "move:css": "mkdir ./dist/css; for file in `cat dependencies-css.txt`; do cp \"$file\" ./dist/css; done",
+    "move:other": "mkdir ./dist/img; cp ./src/img/* ./dist/img",
     "move:deploy": "cp -r ./dist/* ~/Qlik/Sense/Extensions/qsHighlightMap",
-    "move": "mkdir ./dist/css ; npm run move:css && cp ./src/qsHighlightMap.qextmpl ./dist/qsHighlightMap.qext",
+    "move": "npm run move:css ; npm run move:other && cp ./src/qsHighlightMap.qextmpl ./dist/qsHighlightMap.qext",
     "deploy": "open http://localhost:4848/sense/app/%2Fapps%2FConsumer%20Goods%20Sales.qvf/sheet/FFmnDA/state/analysis ; npm run build && npm run move:deploy",
     "deploy:watch": "watch 'npm run deploy' ./src/js",
     "css:stylus": "stylus ./src/css -o ./src/css",

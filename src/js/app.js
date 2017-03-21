@@ -2,6 +2,7 @@
 import L from "leaflet";
 import $ from "jquery";
 import pulseIcon from "leaflet-pulse-icon";
+import * as utils from "./utils";
 
 'use strict';
 
@@ -141,10 +142,6 @@ let app = {
 
 	},
 
-	_swapCoords(coordsArr) {
-		return coordsArr.reverse(); // Polyfill exists for reverse in IE11 in Sense?
-	},
-
 	_createFeatureFromStep(step, MIN_VAL, MAX_VAL) {
 		const options = this.getOptions();
 
@@ -164,13 +161,13 @@ let app = {
 		if (isNaN(latLngArr[0]) || isNaN(latLngArr[1])) {
 			return null;
 		}
-		latLngArr = options.coordsNorthingFirst ? this._swapCoords(latLngArr) : latLngArr;
+		latLngArr = options.coordsNorthingFirst ? utils.swapCoords(latLngArr) : latLngArr;
 
 		// Create a radius and color based on the measure value
 
 
-		var radius = parseInt(this._normalizeValue(MIN_VAL, MAX_VAL, measureValue, options.minFeatureSize, options.maxFeatureSize)),
-			colorValue = parseInt(this._normalizeValue(MIN_VAL, MAX_VAL, measureValue, 0, 255));
+		var radius = parseInt(utils.normalize(MIN_VAL, MAX_VAL, measureValue, options.minFeatureSize, options.maxFeatureSize)),
+			colorValue = parseInt(utils.normalize(MIN_VAL, MAX_VAL, measureValue, 0, 255));
 
 		// console.log(measureValue + "->" + radius);
 		var color = "rgb(" + [colorValue, 0, 0].join(", ") + ")";
@@ -181,23 +178,23 @@ let app = {
 		return feature;
 	},
 
-	highlightFeature(feature) {
-		// if (!this.$canvas) {
-		// 	this.$canvas = $('<canvas class="qv-highlight-canvas" />');
-		// }
-		// $(".qv-object-qshighlightmap-mapdiv").append(this.$canvas);
-		// this._drawCanvasHole(feature._point.x, feature._point.x + feature._radius * 2, feature._point.y, feature._point.y + feature._radius * 2);
+	// highlightFeature(feature) {
+	// 	// if (!this.$canvas) {
+	// 	// 	this.$canvas = $('<canvas class="qv-highlight-canvas" />');
+	// 	// }
+	// 	// $(".qv-object-qshighlightmap-mapdiv").append(this.$canvas);
+	// 	// this._drawCanvasHole(feature._point.x, feature._point.x + feature._radius * 2, feature._point.y, feature._point.y + feature._radius * 2);
 
-		var latLng = feature.getLatLng();
-		this.fadeLayer(this.timeLayer, false);
-		this.map.flyTo(latLng, 10, {duration: 2});
+	// 	var latLng = feature.getLatLng();
+	// 	this.fadeLayer(this.timeLayer, false);
+	// 	this.map.flyTo(latLng, 10, {duration: 2});
 
-		this._timeouts.push(
-			setTimeout(() => {
-				this.fadeLayer(this.timeLayer, true);
-			}, 4000)
-		);
-	},
+	// 	this._timeouts.push(
+	// 		setTimeout(() => {
+	// 			this.fadeLayer(this.timeLayer, true);
+	// 		}, 4000)
+	// 	);
+	// },
 
 	// _drawCanvasHole(left, right, top, bottom) {
 
@@ -484,14 +481,8 @@ let app = {
 			// highlightMarker.openPopup();
 		});
 		return pulsingMarkers;
-	},
-
-	_normalizeValue(min, max, val, desiredMin, desiredMax) {
-		desiredMin = desiredMin || 0;
-		desiredMax = desiredMax || 1;
-		
-		return (desiredMax - desiredMin) * (val - min) / (max - min) + desiredMin;
 	}
+
 };
 
 
