@@ -4,4 +4,4 @@ A Qlik Sense extension map which highlights the extremes in your data – so far
 
 This is also a proof of concept that it is possible to write Qlik Sense extensions with EcmaScript 2015 and later :)
 
-<img src="./src/img/qsHighlightMap2_cut.map4.gif" width="600" />
+<img src="./src/img/qsHighlightMap2_cut.mp4.gif" width="600" />
