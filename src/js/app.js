@@ -405,7 +405,9 @@ let app = {
 	},
 	
 	_renderLayer(layer) {
-		let bounds = this.timeLayer.getBounds();
+		let bounds = this.timeLayer
+							.getBounds()
+							.pad(0.1); // contain the tooltip also
 		
 		const FLY_DURATION_MS = 500;
 		const FLY_DELAY_MS = 1000;
