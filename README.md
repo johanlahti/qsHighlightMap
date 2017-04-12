@@ -4,7 +4,7 @@
 
 A Qlik Sense extension map which highlights the extremes in your data – so far max and min values in current data selection.
 
-This is also a proof of concept for writing Qlik Sense extensions with EcmaScript 2015 and later :)
+This is also a proof of concept that you can write Qlik Sense extensions with EcmaScript 2015 and later :)
 
 <img src="./src/img/qsmap-showcase.gif" width="800" />
 
@@ -24,7 +24,7 @@ This is also a proof of concept for writing Qlik Sense extensions with EcmaScrip
 
 ## Limitations
 
-- Works only for point data
+- Works only with point data
 - Does not work with Storytelling
 
 ## License
